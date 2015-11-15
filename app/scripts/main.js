@@ -56,14 +56,27 @@ var pingData = function () {
         console.log("Received "+my_data.length+" edges!");
 
         var countNeeded = Math.ceil(my_data.length/2048.0);
-        for(var n=0;n<countNeeded;n++)
+        var ns = [];
+        for(var k=0;k<countNeeded;k++)
+        {
+           ns.push(k);
+        }
+
+        ns.forEach(function(n)
         {
            var offset = n*2048;
            var thisLen = Math.min(my_data.length-offset, 2048);
-
+           //console.log("N is "+n+": should cover "+offset+" - "+(offset+thisLen));
+           //if(n>0) continue;
+           
            data[n].set("length", thisLen);
            data[n].set("expr", function (emit, i) {
                var edge = my_data[offset+i];
+               if(!edge){
+                  console.log(n+": Ack "+offset+" "+i+"="+(offset+i)+" : "+my_data.length);
+                  edge=my_data[0];
+               }
+
                var p = edge.positions;
                emit(p[0].x, p[0].y, p[0].z);
                emit(p[1].x, p[1].y, p[1].z);
@@ -76,7 +89,7 @@ var pingData = function () {
                emit(c.r, c.g, c.b, c.a);
            });
 
-        }
+        });
      }
   });
 }
@@ -85,6 +98,7 @@ var pingData = function () {
 var data = [];
 var colors = [];
 var vectors = [];
+var offsets = [];
 for(var n=0;n<10;n++)
 {
    data.push(view.array({
@@ -113,9 +127,11 @@ for(var n=0;n<10;n++)
       width: .5,
       color: '#ffffff',
    }));
+
+   offsets.push(0);
 }
 
-view.inspect();
+//view.inspect();
 
 
 setTimeout(pingData, 500);
