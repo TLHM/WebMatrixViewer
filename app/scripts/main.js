@@ -55,54 +55,67 @@ var pingData = function () {
         var my_data = xhr.response.edges;
         console.log("Received "+my_data.length+" edges!");
 
-        datas.set("length", my_data.length);
-        datas.set("expr", function (emit, i) {
-            var edge = my_data[i];
-            var p = edge.positions;
-            emit(p[0].x, p[0].y, p[0].z);
-            emit(p[1].x, p[1].y, p[1].z);
-        });
+        var countNeeded = Math.ceil(my_data.length/2048.0);
+        for(var n=0;n<countNeeded;n++)
+        {
+           var offset = n*2048;
+           var thisLen = Math.min(my_data.length-offset, 2048);
 
-        colors.set("length", my_data.length);
-        colors.set("expr", function (emit, i) {
-            var edge = my_data[i];
-            var c = edge.color;
-            emit(c.r, c.g, c.b, c.a);
-        });
+           data[n].set("length", thisLen);
+           data[n].set("expr", function (emit, i) {
+               var edge = my_data[offset+i];
+               var p = edge.positions;
+               emit(p[0].x, p[0].y, p[0].z);
+               emit(p[1].x, p[1].y, p[1].z);
+           });
+
+           colors[n].set("length", thisLen);
+           colors[n].set("expr", function (emit, i) {
+               var edge = my_data[offset+i];
+               var c = edge.color;
+               emit(c.r, c.g, c.b, c.a);
+           });
+
+        }
      }
   });
 }
 
-// Draw vectors
-var datas =
-   view.array({
+// Set up some vectors and data to fill
+var data = [];
+var colors = [];
+var vectors = [];
+for(var n=0;n<10;n++)
+{
+   data.push(view.array({
      length: 1,
      channels: 3,
      items: 2,
-     id: "vectorData",
+     id: "vectorData"+n,
      expr: function (emit, i) {
-     emit(0, 0, i);
-     emit(0, 1, i);
+     emit(9999, 0, i);
+     emit(9999, 1, i);
      },
-   });
-var colors =
-   view.array({
+  }));
+   colors.push(view.array({
         length: 1,
         channels: 4,
         items: 1,
-        id: "colorData",
+        id: "colorData"+n,
         expr: function (emit, i) {
         emit(1, 0, 0, 1);
         },
-   });
-var vector =
-   view.vector({
-   points: "#vectorData",
-   colors: "#colorData",
-   end: false,
-   width: .5,
-   color: '#ffffff',
-   });
+   }));
+   vectors.push(view.vector({
+      points: "#vectorData"+n,
+      colors: "#colorData"+n,
+      end: false,
+      width: .5,
+      color: '#ffffff',
+   }));
+}
+
+view.inspect();
 
 
 setTimeout(pingData, 500);
