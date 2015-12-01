@@ -1,3 +1,5 @@
+'use strict';
+
 //Create a mathbox! Copied boiler plate
 //Though at some point I'll look into controls
 var mathbox = mathBox({
@@ -10,7 +12,10 @@ var mathbox = mathBox({
      klass: THREE.TrackballControls,
    },
 });
-if (mathbox.fallback) throw "WebGL not supported";
+if (mathbox.fallback)
+{
+   throw "WebGL not supported";
+}
 
 //Set up Three to render for us
 var three = mathbox.three;
@@ -46,9 +51,9 @@ three.on('update', function () {
   time = clock / 4;
 
   var t = Math.max(clock - 1, 0) / 12;
-  t = t < .5 ? t * t : t - .25;
+  t = t < 0.5 ? t * t : t - 0.25;
 
-  var o = .5 - .5 * Math.cos(Math.min(1, t) * π);
+  //var o = 0.5 - 0.5 * Math.cos(Math.min(1, t) * π);
 
   var c = Math.cos(t);
   var s = Math.sin(t);
@@ -72,30 +77,36 @@ var fetch = function (url, type, callback) {
    //Update progress bar as we load
    xhr.addEventListener('progress', function(oEvent){
       myProgress = ( oEvent.loaded / oEvent.total ) * 60;
-   })
+   });
 
    xhr.send();
 
    //Make the loading bar keep track of progress
-   load.set("expr", function(emit,i){
+   load.set("expr", function(emit){
       emit(-30,-8);
       emit(-30+myProgress,-8);
    });
-}
+};
 
 //Uses fetch to get data
 //Contains the callback for onLoad
 var pingData = function () {
+   var filePath;
    var query = window.location.search.substring(1);
    var vars = query.split("&");
-    for (var i=0;i<vars.length;i++) {
-         var pair = vars[i].split("=");
-         if(pair[0] == 'data'){
-            var filePath = pair[1];
-         }
+    for (var i=0;i<vars.length;i++)
+    {
+      var pair = vars[i].split("=");
+      if(pair[0] === 'data')
+      {
+         filePath = pair[1];
+      }
     }
    console.log(filePath);
-   if(filePath) filePath='data/'+filePath; else var filePath;
+   if(filePath)
+   {
+      filePath='data/'+filePath;
+   }
 
    console.log("ping that data");
    fetch(filePath || 'data/can_292.json', 'json', function (err, xhr) {
@@ -150,16 +161,16 @@ var pingData = function () {
      }
 
      //Kill loading bar, loading is done!
-     load.set('expr', function(emit,i){
+     /*load.set('expr', function(emit,i){
         emit(-9999, -8);
         emit(-9999, -8);
      });
      mathbox.select('#loadingBarBG').set('expr', function(emit,i){
         emit(-9999,0,0);
         emit(-9999,1,0);
-     });
+     });*/
   });
-}
+};
 
 // Set up some vectors and data to fill
 //Current edge max, according to these resources is 40,960 edges
@@ -184,7 +195,7 @@ for(var n=0;n<20;n++)
         channels: 4,
         items: 1,
         id: "colorData"+n,
-        expr: function (emit, i) {
+        expr: function (emit) {
            emit(1, 0, 0, 1);
         },
    }));
@@ -205,7 +216,7 @@ var load = view.array({
    channels: 2,
    items:2,
    id: "loadingBar",
-   expr: function(emit, i){
+   expr: function(emit){
       emit(9999, 0);
       emit(9999, 1);
    }
@@ -222,9 +233,9 @@ view.array({
    channels: 3,
    items:2,
    id: "loadingBarBG",
-   expr: function(emit, i){
-      emit(-30.3, -8,-.1);
-      emit(30.3, -8,-.1);
+   expr: function(emit){
+      emit(-30.3, -8,-0.1);
+      emit(30.3, -8,-0.1);
    }
 });
 view.vector({
