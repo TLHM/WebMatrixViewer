@@ -86,6 +86,17 @@ var fetch = function (url, type, callback) {
 //Uses fetch to get data
 //Contains the callback for onLoad
 var pingData = function () {
+   var query = window.location.search.substring(1);
+   var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+         var pair = vars[i].split("=");
+         if(pair[0] == 'data'){
+            var filePath = pair[1];
+         }
+    }
+   console.log(filePath);
+   if(filePath) filePath='data/'+filePath; else var filePath;
+
    console.log("ping that data");
    fetch(filePath || 'data/can_292.json', 'json', function (err, xhr) {
       //If we get a proper response
